@@ -16,5 +16,7 @@ except OSError:
 else:
     print("Directory %s created" % dest)
 
-for file in os.listdir(path):
-    shutil.move(file,dest)
+
+for root, dirnames, filenames in os.walk(path):
+    for  file in filenames:
+        shutil.move(os.path.join(root,file), os.path.join(dest,file))
