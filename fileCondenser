@@ -1,0 +1,20 @@
+import os
+import shutil
+
+path = input("Where are your files?")
+path = f"{path}"
+os.chdir(path)
+dest = input("Name your new folder:")
+l = len(path)
+dest = path[:l] + dest
+dest = f"{dest}"
+
+try:
+    os.mkdir(dest)
+except OSError:
+    print("Creation of directory %s has failed" % dest)
+else:
+    print("Directory %s created" % dest)
+
+for file in os.listdir(path):
+    shutil.move(file,dest)
