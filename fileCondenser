@@ -4,9 +4,12 @@ import shutil
 path = input("Where are your files?")
 path = f"{path}"
 os.chdir(path)
-dest = input("Name your new folder:")
 l = len(path)
-dest = path[:l] + dest
+
+dest = input("Name your new folder:")
+excl_dirs = [dest]
+
+dest = path[:l] + ('/' + dest)
 dest = f"{dest}"
 
 try:
@@ -18,5 +21,7 @@ else:
 
 
 for root, dirnames, filenames in os.walk(path):
+    dirnames[:] = [d for d in dirnames if d not in excl_dirs]
     for  file in filenames:
-        shutil.move(os.path.join(root,file), os.path.join(dest,file))
+        shutil.copy(os.path.join(root,file), os.path.join(dest,file))
+       
