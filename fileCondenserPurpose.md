@@ -1,4 +1,4 @@
-# Situation:
+# Situation
 
 - Client has a large collection of files at a directory with many subfolders/files.  
 - They want to collect them in one location for whatever reason, to print, etc.  
