@@ -7,7 +7,7 @@ if __name__ == '__main__':
     if len(sys.argv) != 2:
         print(f'Inputs: {sys.argv[0]} | {sys.argv[1]}')
         sys.stderr.write(f'This script takes one parameter: path/to/csv | You currently have: {len(sys.argv)}')
-        sys.stderr.write("Example: python3 ReadCSV.py path/to/csv")
+        sys.stderr.write("Example: python3 CSV_Reformatter.py path/to/csv")
         sys.exit(1)
 
     input_path = sys.argv[1]
