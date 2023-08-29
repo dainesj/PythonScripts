@@ -1,5 +1,6 @@
 import pandas as pd
 import sys
+import re
 import os
 
 
@@ -15,37 +16,60 @@ def parse_args() -> str:
     return file_path
 
 
+# Check that the index requested by the user is more than 0 and less than the highest column index
+def check_bad_edges(user_data: list, columns_len: int) -> bool:
+    for num in user_data:
+        if int(num) < 0 or int(num) > columns_len:
+            print(f"You entered an invalid number: {num} | Largest possible index: {columns_len}")
+            exit()
+        else:
+            return True
+
+# Check each character value, ensure they're either: digits, commas, or hyphens
+def check_characters(value_list: list):
+    for s in value_list:
+        for c in s:
+            if c.isdigit() or c == ',' or c == '-':
+                continue
+            else:
+                print(f"Invalid character {c}, expecting: positive integers, comma, or hyphen.")
+                exit()
+    return True
+
+
 # Show the user all the column indexes and names, ask them which they want
-# Take the list, strip all whitespace, split on comma
-def column_menu(tup_list: tuple, column_length: int) -> list:
+# Take the list, strip all whitespace, split on comma, remove all empty strings
+# Check for bad edge cases
+def column_menu(column_len: int) -> list:
     print("Printing a list of column index and names")
     print("Create a list of indexes (ex: 1-5,7,12-15) and this script will output only data for those columns")
     print(*tuple_list, sep='\n')
 
     column_list = input("Enter the column index you'd like to grab\n")
-    return [x for x in column_list.replace(" ", "").split(',')]
+    clean_col_list = [x for x in column_list.replace(" ", "").split(',') if x]
+    character_list = re.split(",|-", ",".join(clean_col_list))
+    if check_characters(character_list):
+        if check_bad_edges(character_list, column_len):
+            return clean_col_list
 
 
 # Take list of user input, parse ranges and individual indexes, append to list, return list
 def parse_user_list(user_indexes: list) -> list:
     output_list = []
-    try:
-        for x in user_indexes:
-            if '-' in x:
-                s = x.split("-")
-                if int(s[-1]) == int(s[0]):
-                    continue
-                if int(s[-1]) > int(s[0]):
-                    for n in range(int(s[0]), int(s[-1]) + 1):
-                        output_list.append(n)
-                else:
-                    for n in reversed(range(int(s[-1]), int(s[0]) + 1)):
-                        output_list.append(n)
+
+    for x in user_indexes:
+        if '-' in x:
+            s = x.split("-")
+            if int(s[-1]) == int(s[0]):
+                continue
+            if int(s[-1]) > int(s[0]):
+                for n in range(int(s[0]), int(s[-1]) + 1):
+                    output_list.append(n)
             else:
-                output_list.append(int(x))
-    except ValueError as e:
-        print(f"This script expects positive integers, commas, or hyphens.\n {e}")
-        exit()
+                for n in reversed(range(int(s[-1]), int(s[0]) + 1)):
+                    output_list.append(n)
+        else:
+            output_list.append(int(x))
 
     return output_list
 
@@ -84,6 +108,6 @@ if __name__ == '__main__':
     df = csv_to_dataframe(input_path)
     columns = grab_columns(df)
     tuple_list = tuple(((columns.index(x), x) for x in columns))
-    user_indices = column_menu(tuple_list, len(columns) - 1)
+    user_indices = column_menu(len(columns) - 1)
     out_list = parse_user_list(user_indices)
     list_to_dataframe(out_list, df, input_path)
