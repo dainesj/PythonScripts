@@ -85,7 +85,7 @@ def grab_columns(dataframe: pd.DataFrame) -> list:
     return dataframe.columns.values.tolist()
 
 
-# Take in user's requested indexes, grab those from the dataframe, write the dataframe to a CSV at present working directory with _dataframe.csv postfix
+# Take in user's requested indexes, grab those from the dataframe, write the dataframe to a CSV at the input file destination with _dataframe.csv postfix
 def list_to_dataframe(in_list: list, dataf: pd.DataFrame, path: str):
     try:
         dataf = dataf[dataf.columns[in_list]]
