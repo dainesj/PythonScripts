@@ -16,7 +16,7 @@ def parse_args() -> str:
     return file_path
 
 
-# Check that the index requested by the user is more than 0 and less than the highest column index
+# Check that the index requested by the user is greater than 0 and less than the highest column index
 def check_bad_edges(user_data: list, columns_len: int) -> bool:
     for num in user_data:
         if int(num) < 0 or int(num) > columns_len:
@@ -25,8 +25,8 @@ def check_bad_edges(user_data: list, columns_len: int) -> bool:
         else:
             return True
 
-# Check each character value, ensure they're either: digits, commas, or hyphens
-def check_characters(value_list: list):
+
+def check_characters(value_list: list) -> bool:
     for s in value_list:
         for c in s:
             if c.isdigit() or c == ',' or c == '-':
@@ -45,8 +45,8 @@ def column_menu(column_len: int) -> list:
     print("Create a list of indexes (ex: 1-5,7,12-15) and this script will output only data for those columns")
     print(*tuple_list, sep='\n')
 
-    column_list = input("Enter the column index you'd like to grab\n")
-    clean_col_list = [x for x in column_list.replace(" ", "").split(',') if x]
+    column_string = input("Enter the column index you'd like to grab\n")
+    clean_col_list = [x for x in column_string.replace(" ", "").split(',') if x]
     character_list = re.split(",|-", ",".join(clean_col_list))
     if check_characters(character_list):
         if check_bad_edges(character_list, column_len):
@@ -77,14 +77,12 @@ def parse_user_list(user_indexes: list) -> list:
 # Convert the input CSV file to a Pandas dataframe
 def csv_to_dataframe(path: str) -> pd.DataFrame:
     data = pd.read_csv(path)
-    dataframe = pd.DataFrame(data)
-    return dataframe
+    return pd.DataFrame(data)
 
 
 # From the dataframe return a list of the columns
 def grab_columns(dataframe: pd.DataFrame) -> list:
-    column_list = dataframe.columns.values.tolist()
-    return column_list
+    return dataframe.columns.values.tolist()
 
 
 # Take in user's requested indexes, grab those from the dataframe, write the dataframe to a CSV at present working directory with _dataframe.csv postfix
