@@ -17,7 +17,6 @@ def parse_args() -> str:
 
 # Show the user all the column indexes and names, ask them which they want
 # Take the list, strip all whitespace, split on comma
-# Check for bad edge cases
 def column_menu(tup_list: tuple, column_length: int) -> list:
     print("Printing a list of column index and names")
     print("Create a list of indexes (ex: 1-5,7,12-15) and this script will output only data for those columns")
