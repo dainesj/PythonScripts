@@ -2,12 +2,17 @@ import argparse
 import json
 
 
+# Grab file path from CLI
 def initialize_parser():
     parser = argparse.ArgumentParser(description="JSON Schema Type Checker")
     parser.add_argument('-f', dest="filepath", help="Path to JSON schema file")
     return parser.parse_args()
 
 
+# Iterate through the schema line-by-line
+# Create and return a dictionary where the key is the line itself and the value is the line number
+#     I did it this way to possibly get a constant time lookup on lines but didn't find a way
+#     to get the line itself while iterating, maybe in the future.
 def populate_json_line_numbers(file_path: str) -> dict:
     json_file_line_numbers = {}
     with open(file_path) as f:
@@ -17,12 +22,22 @@ def populate_json_line_numbers(file_path: str) -> dict:
     return json_file_line_numbers
 
 
+# Grab the filepath, read the schema, return a dictionary representation
 def load_json_schema(file_path: str) -> dict:
     with open(file_path) as f:
         schema = json.loads(f.read())
         return schema
 
 
+# Recursively iterate through the dictionary, checking four conditions:
+# if "type" not in (d[k].keys())
+#     Our primary check, we want to see if there's properties missing the type field
+# "$ref" not in v.keys()
+#     We don't want to flag on $ref tags, we check them through the recursive nature anyway
+# k not in exclusion_list
+#     We don't want to flag on "properties" or "definitions", they don't need types
+# len(v) != 0 and any(d[k].values()) is True
+#     Edge case where an empty dictionary value would flag. Unsure of the validity of an empty dict, handling it anyways
 def key_check(d: dict, o_list: list) -> list:
     for k, v in d.items():
         if isinstance(v, dict):
@@ -34,6 +49,7 @@ def key_check(d: dict, o_list: list) -> list:
     return o_list
 
 
+# Main
 if __name__ == '__main__':
     exclusion_list = ["properties", "definitions"]
     bad_props = []
@@ -43,6 +59,9 @@ if __name__ == '__main__':
     input_schema = load_json_schema(parsed_args.filepath)
     bad_values = key_check(input_schema, bad_props)
 
+    # Iterate through our line numbers to see which line the bad properties are at
+    # Print them to the console
+    # This could get expensive if there's a lot of bad values(O = n^2), going to ignore that
     for line, line_num in json_line_numbers.items():
         for bad in bad_values:
             if bad in line and ":" in line:
