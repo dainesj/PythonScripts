@@ -38,17 +38,34 @@ def load_json_schema(file_path: str) -> dict:
 # len(v) != 0 and any(d[k].values()) is True
 #     Edge case where an empty dictionary value would flag. Unsure of the validity of an empty dict, handling it anyway
 def check_validity(d, k, v):
-    if "type" not in (d[k].keys()) and "$ref" not in v.keys() and k not in exclusion_list and len(v) != 0 and any(d[k].values()) is True:
+    if "type" not in (d[k].keys()) and "$ref" not in v.keys() and k not in exclusion_list and len(v) != 0 and any(
+            d[k].values()) is True:
         return True
 
 
 # Check that the oneOf statement has a type value, if so return true.
 def one_of(d):
     for x in d:
-        if list(x.keys()) and list(x.keys())[0] == "type" and x.values() :
+        if list(x.keys()) and list(x.keys())[0] == "type" and x.values():
             return True
         else:
             return False
+
+
+# Check objects which have an internal properties field, data structure here is tuple hence x[1] to go get value, x[0] would get key
+
+def property_check(d):
+    bad_list = []
+    for x in d.items():
+        if x[1] and list(x[1].keys())[0] == "type":
+            pass
+        else:
+            bad_list.append(x[0])
+
+    if bad_list:
+        return bad_list
+    else:
+        return True
 
 
 # Recursively iterate through the dictionary, check keys for validity
@@ -61,6 +78,12 @@ def key_check(d: dict, o_list: list) -> list:
                     key_check(v, o_list)
                 else:
                     o_list.append(k)
+            elif "properties" in v.keys():
+                if property_check(v['properties']) is True:
+                    key_check(v, o_list)
+                else:
+                    o_list += property_check(v['properties'])
+
             elif check_validity(d, k, v) is True:
                 o_list.append(k)
         else:
@@ -74,7 +97,7 @@ def key_check(d: dict, o_list: list) -> list:
 def line_number_lookup(list_to_find: list, line_dict: dict):
     for line, line_num in line_dict.items():
         for bad in list_to_find:
-            if bad in line and ":" in line:
+            if bad in line and f'"{bad}"' == line.strip().split(':')[0]:
                 print(f"Property missing type: {bad} | Line Number: {line_num + 1}")
 
 
