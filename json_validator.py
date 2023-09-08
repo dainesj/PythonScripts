@@ -29,7 +29,6 @@ def load_json_schema(file_path: str) -> dict:
         return schema
 
 
-# Recursively iterate through the dictionary, checking four conditions:
 # if "type" not in (d[k].keys())
 #     Our primary check, we want to see if there's properties missing the type field
 # "$ref" not in v.keys()
@@ -37,12 +36,32 @@ def load_json_schema(file_path: str) -> dict:
 # k not in exclusion_list
 #     We don't want to flag on "properties" or "definitions", they don't need types
 # len(v) != 0 and any(d[k].values()) is True
-#     Edge case where an empty dictionary value would flag. Unsure of the validity of an empty dict, handling it anyways
+#     Edge case where an empty dictionary value would flag. Unsure of the validity of an empty dict, handling it anyway
+def check_validity(d, k, v):
+    if "type" not in (d[k].keys()) and "$ref" not in v.keys() and k not in exclusion_list and len(v) != 0 and any(d[k].values()) is True:
+        return True
+
+
+# Check that the oneOf statement has a type value, if so return true.
+def one_of(d):
+    for x in d:
+        if list(x.keys()) and list(x.keys())[0] == "type" and x.values() :
+            return True
+        else:
+            return False
+
+
+# Recursively iterate through the dictionary, check keys for validity
 def key_check(d: dict, o_list: list) -> list:
     for k, v in d.items():
         if isinstance(v, dict):
             key_check(v, o_list)
-            if "type" not in (d[k].keys()) and "$ref" not in v.keys() and k not in exclusion_list and len(v) != 0 and any(d[k].values()) is True:
+            if "oneOf" in v.keys():
+                if one_of(v['oneOf']) is True:
+                    key_check(v, o_list)
+                else:
+                    o_list.append(k)
+            elif check_validity(d, k, v) is True:
                 o_list.append(k)
         else:
             pass
