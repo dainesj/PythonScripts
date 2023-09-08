@@ -49,6 +49,16 @@ def key_check(d: dict, o_list: list) -> list:
     return o_list
 
 
+# Iterate through our line numbers to see which line the bad properties are at
+# Print them to the console
+# This could get expensive if there's a lot of bad values(O = n^2), going to ignore that
+def line_number_lookup(list_to_find: list, line_dict: dict):
+    for line, line_num in line_dict.items():
+        for bad in list_to_find:
+            if bad in line and ":" in line:
+                print(f"Property missing type: {bad} | Line Number: {line_num + 1}")
+
+
 # Main
 if __name__ == '__main__':
     exclusion_list = ["properties", "definitions"]
@@ -58,11 +68,4 @@ if __name__ == '__main__':
     json_line_numbers = populate_json_line_numbers(parsed_args.filepath)
     input_schema = load_json_schema(parsed_args.filepath)
     bad_values = key_check(input_schema, bad_props)
-
-    # Iterate through our line numbers to see which line the bad properties are at
-    # Print them to the console
-    # This could get expensive if there's a lot of bad values(O = n^2), going to ignore that
-    for line, line_num in json_line_numbers.items():
-        for bad in bad_values:
-            if bad in line and ":" in line:
-                print(f"Property missing type: {bad} | Line Number: {line_num + 1}")
+    line_number_lookup(bad_values, json_line_numbers)
