@@ -2,7 +2,7 @@ import argparse
 import json
 
 
-# Grab file path from CLI
+# Initializes an argument parser to grab the file path of the JSON schema file from the command line.
 def initialize_parser():
     parser = argparse.ArgumentParser(description="JSON Schema Type Checker")
     parser.add_argument('-f', dest="filepath", help="Path to JSON schema file")
@@ -11,8 +11,6 @@ def initialize_parser():
 
 # Iterate through the schema line-by-line
 # Create and return a dictionary where the key is the line itself and the value is the line number
-#     I did it this way to possibly get a constant time lookup on lines but didn't find a way
-#     to get the line itself while iterating, maybe in the future.
 def populate_json_line_numbers(file_path: str) -> dict:
     json_file_line_numbers = {}
     with open(file_path) as f:
@@ -53,13 +51,15 @@ def one_of(d):
 
 
 # Check objects which have an internal properties field, data structure here is tuple hence x[1] to go get value, x[0] would get key
-
 def property_check(d):
     bad_list = []
     for x in d.items():
-        if x[1] and list(x[1].keys())[0] == "type":
+        if bool(x[1]) is False or list(x[1].keys())[0] == "$ref" or x[1] == "$ref":
+            pass
+        elif x[1] or list(x[1].keys())[0] == "type":
             pass
         else:
+            print(f"First: {x[1]}\nSecond:{list(x[1].keys())[0]}\n")
             bad_list.append(x[0])
 
     if bad_list:
@@ -70,22 +70,22 @@ def property_check(d):
 
 # Recursively iterate through the dictionary, check keys for validity
 def key_check(d: dict, o_list: list) -> list:
-    for k, v in d.items():
-        if isinstance(v, dict):
-            key_check(v, o_list)
-            if "oneOf" in v.keys():
-                if one_of(v['oneOf']) is True:
-                    key_check(v, o_list)
+    for key, val in d.items():
+        if isinstance(val, dict):
+            key_check(val, o_list)
+            if "oneOf" in val.keys():
+                if one_of(val['oneOf']) is True:
+                    key_check(val, o_list)
                 else:
-                    o_list.append(k)
-            elif "properties" in v.keys():
-                if property_check(v['properties']) is True:
-                    key_check(v, o_list)
+                    o_list.append(key)
+            elif "properties" in val.keys():
+                if property_check(val['properties']) is True:
+                    key_check(val, o_list)
                 else:
-                    o_list += property_check(v['properties'])
+                    o_list += property_check(val['properties'])
 
-            elif check_validity(d, k, v) is True:
-                o_list.append(k)
+            elif check_validity(d, key, val) is True:
+                o_list.append(key)
         else:
             pass
     return o_list
