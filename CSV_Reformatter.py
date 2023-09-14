@@ -45,7 +45,7 @@ def column_menu(column_len: int) -> list:
     print("Create a list of indexes (ex: 1-5,7,12-15) and this script will output only data for those columns")
     print(*tuple_list, sep='\n')
 
-    column_string = input("Enter the column index you'd like to grab\n")
+    column_string = input("Enter the column indexes you'd like to grab. (ex: 1-5,7,12-15)\n")
     clean_col_list = [x for x in column_string.replace(" ", "").split(',') if x]
     character_list = re.split(",|-", ",".join(clean_col_list))
     if check_characters(character_list):
@@ -92,12 +92,12 @@ def list_to_dataframe(in_list: list, dataf: pd.DataFrame, path: str):
     except IndexError as e:
         print(f"Invalid index: {e}")
         exit()
-
-    dataf.to_csv(f"{path}_dataframe.csv", sep='\t', index=False)
-    if os.path.exists(f"{path}_dataframe.csv"):
-        print(f"Created file: {path}_dataframe.csv")
+    data_frame_file_path = f"{path}_dataframe.csv"
+    dataf.to_csv(data_frame_file_path, sep='\t', index=False)
+    if os.path.exists(data_frame_file_path):
+        print(f"Created file: {data_frame_file_path}")
     else:
-        print(f"Could not create file: {path}_dataframe.csv")
+        print(f"Could not create file: {data_frame_file_path}")
 
 
 # Main
